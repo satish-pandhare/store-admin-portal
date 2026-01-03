@@ -17,6 +17,7 @@ const ProductDetails = ({ productId, onBack }) => {
   const [similarProducts, setSimilarProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
     fetchProductDetails();
@@ -28,6 +29,7 @@ const ProductDetails = ({ productId, onBack }) => {
       const data = await api.getProduct(productId);
       setProduct(data);
       setSelectedImage(0);
+      setShowAllReviews(false);
       fetchSimilarProducts(data.category);
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -137,6 +139,68 @@ const ProductDetails = ({ productId, onBack }) => {
                   ))}
                 </div>
               )}
+
+              {/* Tags */}
+              {product.tags && product.tags.length > 0 && (
+                <div className="mt-8 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    Tags
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-slate-50 text-gray-700 rounded-full text-sm font-medium hover:from-emerald-100 hover:to-slate-100 transition-colors border border-emerald-200"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Dimensions & Weight */}
+              {product.dimensions && (
+                <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-5 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Dimensions & Weight
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg p-3">
+                      <span className="text-sm text-gray-600 block mb-1">
+                        Width
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">
+                        {product.dimensions.width} cm
+                      </span>
+                    </div>
+                    <div className="bg-white rounded-lg p-3">
+                      <span className="text-sm text-gray-600 block mb-1">
+                        Height
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">
+                        {product.dimensions.height} cm
+                      </span>
+                    </div>
+                    <div className="bg-white rounded-lg p-3">
+                      <span className="text-sm text-gray-600 block mb-1">
+                        Depth
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">
+                        {product.dimensions.depth} cm
+                      </span>
+                    </div>
+                    <div className="bg-white rounded-lg p-3">
+                      <span className="text-sm text-gray-600 block mb-1">
+                        Weight
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">
+                        {product.weight} kg
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Product Info */}
@@ -190,7 +254,7 @@ const ProductDetails = ({ productId, onBack }) => {
                         ${originalPrice}
                       </span>
                       <span className="text-xl text-green-600 font-semibold">
-                        Save ${(originalPrice - product.price).toFixed(2)}
+                        {product.discountPercentage.toFixed(1)}% Off
                       </span>
                     </>
                   )}
@@ -312,57 +376,75 @@ const ProductDetails = ({ productId, onBack }) => {
                 </div>
               </div>
 
-              {/* Tags */}
-              {product.tags && product.tags.length > 0 && (
+              {/* Customer Reviews */}
+              {product.reviews && product.reviews.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    Tags
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Customer Reviews ({product.reviews.length})
                   </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {product.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-gray-700 rounded-full text-sm font-medium hover:from-blue-100 hover:to-purple-100 transition-colors"
+                  <div className="space-y-4">
+                    {(showAllReviews
+                      ? product.reviews
+                      : product.reviews.slice(0, 1)
+                    ).map((review, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-gradient-to-r from-emerald-50 to-slate-50 border border-emerald-200 rounded-xl p-4"
                       >
-                        #{tag}
-                      </span>
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center">
+                              <span className="text-lg font-bold text-emerald-900">
+                                {review.reviewerName.charAt(0)}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {review.reviewerName}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                {new Date(review.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < review.rating
+                                    ? "text-yellow-400 fill-current"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">
+                          {review.comment}
+                        </p>
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* Dimensions & Weight */}
-              {product.dimensions && (
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    Dimensions & Weight
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-600">Width:</span>
-                      <span className="ml-2 font-medium text-gray-900">
-                        {product.dimensions.width} cm
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Height:</span>
-                      <span className="ml-2 font-medium text-gray-900">
-                        {product.dimensions.height} cm
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Depth:</span>
-                      <span className="ml-2 font-medium text-gray-900">
-                        {product.dimensions.depth} cm
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Weight:</span>
-                      <span className="ml-2 font-medium text-gray-900">
-                        {product.weight} kg
-                      </span>
-                    </div>
-                  </div>
+                  {product.reviews.length > 1 && (
+                    <button
+                      onClick={() => setShowAllReviews(!showAllReviews)}
+                      className="mt-3 text-800 font-semibold hover:text-emerald-900 transition-colors"
+                    >
+                      {showAllReviews
+                        ? "Show Less"
+                        : `Show ${product.reviews.length - 1} More Review${
+                            product.reviews.length - 1 > 1 ? "s" : ""
+                          }`}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -375,7 +457,7 @@ const ProductDetails = ({ productId, onBack }) => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                  Browse Similar Products
+                  Similar Products
                 </h2>
                 <p className="text-gray-600 mt-1">From the same category</p>
               </div>
