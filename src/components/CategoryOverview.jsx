@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Package, List, ChevronRight } from 'lucide-react';
-import api from '../utils/api';
+import React, { useState, useEffect } from "react";
+import { Package, List, ChevronRight } from "lucide-react";
+import api from "../utils/api";
 
 const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
   const [categories, setCategories] = useState([]);
@@ -16,7 +16,7 @@ const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
     try {
       const data = await api.getCategories();
       setCategories(data);
-      
+
       const images = {};
       await Promise.all(
         data.slice(0, 12).map(async (cat) => {
@@ -32,7 +32,7 @@ const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
       );
       setCategoryImages(images);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,9 @@ const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Category Catalog</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Category Catalog
+              </h1>
               <p className="text-gray-600 mt-2">Browse products by category</p>
             </div>
             <button
@@ -87,7 +89,7 @@ const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
                     <Package className="w-16 h-16 text-gray-400" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 capitalize group-hover:text-blue-600 transition-colors">
+                <h3 className="text-lg font-semibold text-gray-900 capitalize group-hover:text-emerald-600 transition-colors">
                   {category.name}
                 </h3>
                 <div className="flex items-center text-gray-500 text-sm mt-2">

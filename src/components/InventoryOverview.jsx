@@ -1,21 +1,27 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ArrowLeft, Star, Menu } from 'lucide-react';
-import api from '../utils/api';
-import { getStockStatus } from '../utils/helpers';
-import { useDebounce } from '../hooks/useDebounce';
-import ProductSkeleton from './ProductSkeleton';
+import React, { useState, useEffect, useMemo } from "react";
+import { Search, ArrowLeft, Star, Menu } from "lucide-react";
+import api from "../utils/api";
+import { getStockStatus } from "../utils/helpers";
+import { useDebounce } from "../hooks/useDebounce";
+import ProductSkeleton from "./ProductSkeleton";
 
-const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) => {
+const InventoryOverview = ({
+  onSelectProduct,
+  categoryFilter = null,
+  onBack,
+}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [selectedCategory, setSelectedCategory] = useState(categoryFilter || '');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("name");
+  const [selectedCategory, setSelectedCategory] = useState(
+    categoryFilter || ""
+  );
   const [categories, setCategories] = useState([]);
   const [skip, setSkip] = useState(0);
   const [total, setTotal] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const debouncedSearch = useDebounce(searchTerm, 300);
   const limit = 20;
 
@@ -32,7 +38,7 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
       const data = await api.getCategories();
       setCategories(data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -47,11 +53,11 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
       } else {
         data = await api.getAllProducts(limit, skip);
       }
-      
+
       setProducts(data.products);
       setTotal(data.total);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
     }
@@ -59,13 +65,13 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
 
   const sortedProducts = useMemo(() => {
     const sorted = [...products];
-    if (sortBy === 'price-low') {
+    if (sortBy === "price-low") {
       sorted.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-high') {
+    } else if (sortBy === "price-high") {
       sorted.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'name') {
+    } else if (sortBy === "name") {
       sorted.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === 'stock') {
+    } else if (sortBy === "stock") {
       sorted.sort((a, b) => b.stock - a.stack);
     }
     return sorted;
@@ -79,12 +85,12 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
     const maxPagesToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
+
     // Adjust start page if we're near the end
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    
+
     const pages = [];
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
@@ -107,7 +113,9 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
                 </button>
               )}
               <h1 className="text-2xl font-bold text-gray-900">
-                {categoryFilter ? `${categoryFilter} Products` : 'Inventory Overview'}
+                {categoryFilter
+                  ? `${categoryFilter} Products`
+                  : "Inventory Overview"}
               </h1>
             </div>
             <button
@@ -118,7 +126,7 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
             </button>
           </div>
 
-          <div className={`${showFilters ? 'block' : 'hidden md:block'}`}>
+          <div className={`${showFilters ? "block" : "hidden md:block"}`}>
             <div className="flex flex-col md:flex-row gap-3">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -194,13 +202,17 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600">
+                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-emerald-600">
                       {product.title}
                     </h3>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-gray-500">{product.brand}</span>
+                      <span className="text-sm text-gray-500">
+                        {product.brand}
+                      </span>
                       <span className="text-xs text-gray-400">•</span>
-                      <span className="text-sm text-gray-500 capitalize">{product.category}</span>
+                      <span className="text-sm text-gray-500 capitalize">
+                        {product.category}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xl font-bold text-gray-900">
@@ -208,14 +220,20 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
                       </span>
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-600">{product.rating}</span>
+                        <span className="text-sm text-gray-600">
+                          {product.rating}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-1 rounded-full ${stockStatus.color}`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${stockStatus.color}`}
+                      >
                         {stockStatus.label}
                       </span>
-                      <span className="text-sm text-gray-600">{product.stock} units</span>
+                      <span className="text-sm text-gray-600">
+                        {product.stock} units
+                      </span>
                     </div>
                   </button>
                 );
@@ -256,8 +274,8 @@ const InventoryOverview = ({ onSelectProduct, categoryFilter = null, onBack }) =
                       onClick={() => setSkip((page - 1) * limit)}
                       className={`w-10 h-10 rounded-lg transition-colors ${
                         page === currentPage
-                          ? 'bg-blue-600 text-white font-semibold shadow-md'
-                          : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700'
+                          ? "bg-blue-600 text-white font-semibold shadow-md"
+                          : "bg-white border border-gray-300 hover:bg-gray-50 text-gray-700"
                       }`}
                     >
                       {page}
