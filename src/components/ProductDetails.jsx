@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Star,
@@ -13,39 +14,27 @@ import {
 import api from "../utils/api";
 
 const ProductDetails = ({ productId, onBack }) => {
-  const [product, setProduct] = useState(null);
-  const [similarProducts, setSimilarProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
-  useEffect(() => {
-    fetchProductDetails();
-  }, [productId]);
+  // Fetch product details with React Query
+  const { data: product, isLoading: loading } = useQuery({
+    queryKey: ["product", productId],
+    queryFn: () => api.getProduct(productId),
+  });
 
-  const fetchProductDetails = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getProduct(productId);
-      setProduct(data);
-      setSelectedImage(0);
-      setShowAllReviews(false);
-      fetchSimilarProducts(data.category);
-    } catch (error) {
-      console.error("Error fetching product:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Fetch similar products with React Query
+  const { data: similarProductsData } = useQuery({
+    queryKey: ["similarProducts", product?.category, productId],
+    queryFn: async () => {
+      const data = await api.getProductsByCategory(product.category, 6);
+      return data.products.filter((p) => p.id !== productId);
+    },
+    enabled: !!product?.category, // Only run when product category is available
+    staleTime: 10 * 60 * 1000, // Similar products stay fresh for 10 minutes
+  });
 
-  const fetchSimilarProducts = async (category) => {
-    try {
-      const data = await api.getProductsByCategory(category, 6);
-      setSimilarProducts(data.products.filter((p) => p.id !== productId));
-    } catch (error) {
-      console.error("Error fetching similar products:", error);
-    }
-  };
+  const similarProducts = similarProductsData || [];
 
   if (loading) {
     return (
@@ -469,7 +458,7 @@ const ProductDetails = ({ productId, onBack }) => {
                   key={prod.id}
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: "smooth" });
-                    fetchProductDetails(prod.id);
+                    // fetchProductDetails(prod.id);
                   }}
                   className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all p-4 text-left group"
                 >

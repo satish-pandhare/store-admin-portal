@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Package, List, ChevronRight, ArrowLeft } from "lucide-react";
 import api from "../utils/api";
 
@@ -7,40 +8,36 @@ const CategoryOverview = ({
   onNavigateToInventory,
   onBack,
 }) => {
-  const [categories, setCategories] = useState([]);
-  const [categoryImages, setCategoryImages] = useState({});
-  const [loading, setLoading] = useState(true);
+  // const [categoryImages, setCategoryImages] = useState({});
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  // Fetch categories with React Query
+  const { data: categories = [], isLoading: loading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: api.getCategories,
+  });
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getCategories();
-      setCategories(data);
-
-      const images = {};
+  // Fetch category images with React Query
+  const { data: images } = useQuery({
+    queryKey: ["categoryImages", categories],
+    queryFn: async () => {
+      const imageMap = {};
       await Promise.all(
-        data.map(async (cat) => {
+        categories.map(async (cat) => {
           try {
             const catData = await api.getProductsByCategory(cat.slug, 1);
             if (catData.products[0]) {
-              images[cat.slug] = catData.products[0].thumbnail;
+              imageMap[cat.slug] = catData.products[0].thumbnail;
             }
           } catch (error) {
             console.error(`Error fetching image for ${cat.slug}:`, error);
           }
         })
       );
-      setCategoryImages(images);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return imageMap;
+    },
+    enabled: categories.length > 0, // Only run when categories are loaded
+    staleTime: 10 * 60 * 1000, // Images stay fresh for 10 minutes
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,9 +92,9 @@ const CategoryOverview = ({
                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all p-6 text-left group"
               >
                 <div className="aspect-square bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
-                  {categoryImages[category.slug] ? (
+                  {images?.[category.slug] ? (
                     <img
-                      src={categoryImages[category.slug]}
+                      src={images[category.slug]}
                       alt={category.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                     />

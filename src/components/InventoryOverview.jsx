@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search, ArrowLeft, Star, Menu } from "lucide-react";
 import api from "../utils/api";
 import { getStockStatus } from "../utils/helpers";
@@ -10,44 +11,28 @@ const InventoryOverview = ({
   categoryFilter = null,
   onBack,
 }) => {
-  // const [products, setProducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [selectedCategory, setSelectedCategory] = useState(
     categoryFilter || ""
   );
-  const [categories, setCategories] = useState([]);
   const [skip, setSkip] = useState(0);
-  const [total, setTotal] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
 
   const debouncedSearch = useDebounce(searchTerm, 300);
   const limit = 20;
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  // Fetch categories with React Query
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: api.getCategories,
+  });
 
-  useEffect(() => {
-    fetchProducts();
-  }, [debouncedSearch, selectedCategory, sortBy]);
-
-  const fetchCategories = async () => {
-    try {
-      const data = await api.getCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
+  // Fetch products with React Query
+  const { data: productsData, isLoading: loading } = useQuery({
+    queryKey: ["products", debouncedSearch, selectedCategory],
+    queryFn: async () => {
       let data;
-      // Fetch all products for proper sorting
       if (debouncedSearch) {
         data = await api.searchProducts(debouncedSearch, 0, 0);
       } else if (selectedCategory) {
@@ -55,16 +40,12 @@ const InventoryOverview = ({
       } else {
         data = await api.getAllProducts(0, 0);
       }
+      return data;
+    },
+  });
 
-      setAllProducts(data.products);
-      setTotal(data.total);
-      setSkip(0); // Reset to first page when filters change
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const allProducts = productsData?.products || [];
+  const total = productsData?.total || 0;
 
   const sortedProducts = useMemo(() => {
     const sorted = [...allProducts];
