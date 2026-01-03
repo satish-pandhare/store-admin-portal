@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Package, List, ChevronRight } from "lucide-react";
+import { Package, List, ChevronRight, ArrowLeft } from "lucide-react";
 import api from "../utils/api";
 
-const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
+const CategoryOverview = ({
+  onSelectCategory,
+  onNavigateToInventory,
+  onBack,
+}) => {
   const [categories, setCategories] = useState([]);
   const [categoryImages, setCategoryImages] = useState({});
   const [loading, setLoading] = useState(true);
@@ -19,7 +23,7 @@ const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
 
       const images = {};
       await Promise.all(
-        data.slice(0, 12).map(async (cat) => {
+        data.map(async (cat) => {
           try {
             const catData = await api.getProductsByCategory(cat.slug, 1);
             if (catData.products[0]) {
@@ -43,15 +47,27 @@ const CategoryOverview = ({ onSelectCategory, onNavigateToInventory }) => {
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Category Catalog
-              </h1>
-              <p className="text-gray-600 mt-2">Browse products by category</p>
+            <div className="flex items-center gap-3">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Category Catalog
+                </h1>
+                {/* <p className="text-gray-600 mt-2">
+                  Browse products by category
+                </p> */}
+              </div>
             </div>
             <button
               onClick={onNavigateToInventory}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
             >
               <List className="w-5 h-5" />
               View All Products

@@ -161,37 +161,37 @@ const ProductDetails = ({ productId, onBack }) => {
 
               {/* Dimensions & Weight */}
               {product.dimensions && (
-                <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-5 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-3 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Dimensions & Weight
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-3">
-                      <span className="text-sm text-gray-600 block mb-1">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-lg p-2">
+                      <span className="text-sm text-gray-600 block mb-0.5">
                         Width
                       </span>
                       <span className="text-lg font-semibold text-gray-900">
                         {product.dimensions.width} cm
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg p-3">
-                      <span className="text-sm text-gray-600 block mb-1">
+                    <div className="rounded-lg p-2">
+                      <span className="text-sm text-gray-600 block mb-0.5">
                         Height
                       </span>
                       <span className="text-lg font-semibold text-gray-900">
                         {product.dimensions.height} cm
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg p-3">
-                      <span className="text-sm text-gray-600 block mb-1">
+                    <div className="rounded-lg p-2">
+                      <span className="text-sm text-gray-600 block mb-0.5">
                         Depth
                       </span>
                       <span className="text-lg font-semibold text-gray-900">
                         {product.dimensions.depth} cm
                       </span>
                     </div>
-                    <div className="bg-white rounded-lg p-3">
-                      <span className="text-sm text-gray-600 block mb-1">
+                    <div className="rounded-lg p-2">
+                      <span className="text-sm text-gray-600 block mb-0.5">
                         Weight
                       </span>
                       <span className="text-lg font-semibold text-gray-900">

@@ -10,7 +10,8 @@ const InventoryOverview = ({
   categoryFilter = null,
   onBack,
 }) => {
-  const [products, setProducts] = useState([]);
+  // const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
@@ -31,7 +32,7 @@ const InventoryOverview = ({
 
   useEffect(() => {
     fetchProducts();
-  }, [debouncedSearch, selectedCategory, skip]);
+  }, [debouncedSearch, selectedCategory, sortBy]);
 
   const fetchCategories = async () => {
     try {
@@ -46,16 +47,18 @@ const InventoryOverview = ({
     setLoading(true);
     try {
       let data;
+      // Fetch all products for proper sorting
       if (debouncedSearch) {
-        data = await api.searchProducts(debouncedSearch, limit, skip);
+        data = await api.searchProducts(debouncedSearch, 0, 0);
       } else if (selectedCategory) {
-        data = await api.getProductsByCategory(selectedCategory, limit, skip);
+        data = await api.getProductsByCategory(selectedCategory, 0, 0);
       } else {
-        data = await api.getAllProducts(limit, skip);
+        data = await api.getAllProducts(0, 0);
       }
 
-      setProducts(data.products);
+      setAllProducts(data.products);
       setTotal(data.total);
+      setSkip(0); // Reset to first page when filters change
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -64,7 +67,7 @@ const InventoryOverview = ({
   };
 
   const sortedProducts = useMemo(() => {
-    const sorted = [...products];
+    const sorted = [...allProducts];
     if (sortBy === "price-low") {
       sorted.sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-high") {
@@ -72,12 +75,19 @@ const InventoryOverview = ({
     } else if (sortBy === "name") {
       sorted.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === "stock") {
-      sorted.sort((a, b) => b.stock - a.stack);
+      sorted.sort((a, b) => b.stock - a.stock);
     }
     return sorted;
-  }, [products, sortBy]);
+  }, [allProducts, sortBy]);
 
-  const totalPages = Math.ceil(total / limit);
+  // Paginate the sorted products
+  const paginatedProducts = useMemo(() => {
+    const startIndex = skip;
+    const endIndex = skip + limit;
+    return sortedProducts.slice(startIndex, endIndex);
+  }, [sortedProducts, skip, limit]);
+
+  const totalPages = Math.ceil(sortedProducts.length / limit);
   const currentPage = Math.floor(skip / limit) + 1;
 
   // Calculate which page numbers to display
@@ -187,7 +197,7 @@ const InventoryOverview = ({
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {sortedProducts.map((product) => {
+              {paginatedProducts.map((product) => {
                 const stockStatus = getStockStatus(product.stock);
                 return (
                   <button
