@@ -70,7 +70,11 @@ const App = () => {
       )}
 
       {currentView === "product-details" && selectedProductId && (
-        <ProductDetails productId={selectedProductId} onBack={handleBack} />
+        <ProductDetails
+          productId={selectedProductId}
+          onBack={handleBack}
+          onSelectProduct={handleSelectProduct}
+        />
       )}
     </div>
   );

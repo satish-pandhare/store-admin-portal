@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import api from "../utils/api";
 
-const ProductDetails = ({ productId, onBack }) => {
+const ProductDetails = ({ productId, onBack, onSelectProduct }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
@@ -458,7 +458,7 @@ const ProductDetails = ({ productId, onBack }) => {
                   key={prod.id}
                   onClick={() => {
                     window.scrollTo({ top: 0, behavior: "smooth" });
-                    // fetchProductDetails(prod.id);
+                    onSelectProduct(prod.id);
                   }}
                   className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all p-4 text-left group"
                 >
